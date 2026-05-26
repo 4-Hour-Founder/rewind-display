@@ -1,0 +1,20 @@
+# Example Rewind Display config for a Retail Rewind NVR using go2rtc restreams.
+# Replace NVR_IP with the Retail Rewind NVR address and stream names with the
+# configured go2rtc stream names from /api/go2rtc/streams.
+
+essentials:
+  screens:
+    - duration: 0
+      streams:
+        - url: "rtsp://NVR_IP:8554/CAM1_sub"
+          name: "Front Register"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_IP:8554/CAM2_sub"
+          name: "Front Door"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_IP:8554/CAM3_sub"
+          name: "Main Aisle"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_IP:8554/CAM4_sub"
+          name: "Parking Lot"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"

@@ -28,7 +28,7 @@ if [ "$(id -u)" -ne 0 ];then echo "ABORT, run this installer as the root user (s
 BASEPATH="$(cd $(dirname "${BASH_SOURCE[0]}");pwd)"
 
 echo "Use this installer on your own risk. Make sure this host does not contain important data and is replacable"
-echo "This installer will configure to boot directly into Opensurv"
+echo "This installer will configure this host to boot directly into Rewind Display"
 echo
 echo -n "The following version will be installed:"
 show_version
@@ -74,7 +74,7 @@ else
 fi
 
 echo
-echo "Do you want me to (re-)start opensurv after install?"
+echo "Do you want me to (re-)start Rewind Display after install?"
 echo "Type yes/no"
 read ANSWERSTART
 

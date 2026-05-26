@@ -1,7 +1,7 @@
 #!/bin/bash
 # Redirect stderr (2) to the main log file
 exec 2> >(while read -r line; do echo "$(date '+%Y/%m/%d %H:%M:%S') - DAEMON: $line"; done >> /home/opensurv/logs/main.log)
-##This script is called by lightm to start opensurv
+## This script is called by LightDM to start Rewind Display.
 export DISPLAY=:0
 #Hide mouse cursor
 /usr/bin/unclutter -idle 2 -root &

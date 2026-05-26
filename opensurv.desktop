@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Opensurv
-Comment=Start Opensurv
+Name=Rewind Display
+Comment=Start Rewind Display
 Exec=/home/opensurv/bin/opensurv
 Type=Application

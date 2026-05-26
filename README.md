@@ -1,10 +1,19 @@
-# OpenSurv - Open Source Surveillance (<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QPJU9K2KZ8D94" target="_blank" rel="nofollow"><img src="https://www.paypal.com/en_US/i/btn/x-click-but21.gif" alt="" /></a>)
+# Rewind Display
 
-## What is OpenSurv?
+Retail Rewind branded camera-wall display software, forked from [OpenSurv](https://github.com/opensurv/opensurv).
 
-OpenSurv is a free application that transforms your [compatible device](#Hardware-list) into a dedicated device to monitor video streams or images.  
+Rewind Display turns a Raspberry Pi, mini PC, or other compatible Linux display box into a dedicated Retail Rewind public display for camera streams and status images.
 
 ![Screenshot](examples/4streams.png)
+
+## OpenSurv Foundation
+
+This fork keeps OpenSurv's proven display engine, watchdog behavior, auto-layout logic, LightDM session, and config paths. User-facing branding and default runtime images are Retail Rewind branded.
+
+For compatibility with upstream install scripts and configs, the Linux runtime user and config path are still:
+
+- `/home/opensurv`
+- `/etc/opensurv`
 
 ## Hardware list
 Explore the [hardware section of the discussion board](https://github.com/OpenSurv/OpenSurv/discussions/categories/hardware-operating-system) to discover how OpenSurv works on various hardware.
@@ -37,20 +46,20 @@ Explore the [hardware section of the discussion board](https://github.com/OpenSu
 - To display a screen vertically, set `rotate90: True` for that screen.
 
 ## How to get started
-In short: The idea is to connect your [compatible device](#Hardware-list) to a monitor and tell OpenSurv which stream(s) and screen(s) it should monitor or cycle between. OpenSurv will auto-calculate all the rest.
+In short: The idea is to connect your [compatible device](#Hardware-list) to a monitor and tell Rewind Display which stream(s) and screen(s) it should monitor or cycle between. The OpenSurv engine will auto-calculate the rest.
 - Get a monitor or a TV (or 2)
-- Get a [compatible device](#Hardware-list) dedicated for OpenSurv
+- Get a [compatible device](#Hardware-list) dedicated for Rewind Display
 - Install a verified [operating system](#Hardware-list) on the device
 - On the freshly installed operating system, log in as a user and git clone this repository: 
-  - `git clone https://github.com/OpenSurv/OpenSurv`
-- Move into the folder `cd OpenSurv`
+  - `git clone https://github.com/FFTY50/rewind-display`
+- Move into the folder `cd rewind-display`
 - OPTIONAL: checkout a specific branch, for example `git checkout v1_latest`, if you want to override the default version
 - Run `sudo ./install.sh` ( this works locally as well as over an ssh session )
 - Enjoy the demo showcase
 
 ## Configuration
 
-OpenSurv has the following config files
+Rewind Display uses the same config files as OpenSurv:
 - `/etc/opensurv/general.yml` => General config, mostly not needed to touch this.
 - `/etc/opensurv/monitor1.yml`  => Define screens and streams used for the first monitor.
 - `/etc/opensurv/monitor2.yml`  => Define screens and streams used for the second monitor.
@@ -79,8 +88,8 @@ OpenSurv will autodetect interruptions and try to restore the stream.
 #### rtsp:// and rtmp://
 This is a remote location with a video stream. OpenSurv will do its best to monitor the stream, it will autodetect interruptions and try to restore the stream.
 
-## How to update OpenSurv to new version <a name="how-to-update"></a>
-- `cd OpenSurv; git pull`
+## How to update Rewind Display <a name="how-to-update"></a>
+- `cd rewind-display; git pull`
 - OPTIONAL: checkout a specific branch, for example `git checkout v1_latest`, if you want to override the default version
 - Run `sudo ./install.sh` (The installer will ask if you want to preserve your current config file)
 - `systemctl restart lightdm.service`
@@ -97,9 +106,9 @@ After installation, you may change the placeholder images to something you like.
 - /home/opensurv/lib/images/loading.png is shown full screen when loading the next screen in a cycle.
 - `systemctl restart lightdm.service`
 
-## OpenSurv in operation
+## Rewind Display in operation
 
-If you used the install.sh script, you can configure your streams in /etc/opensurv. After editing the config files, you need to restart OpenSurv (`systemctl restart lightdm.service`) for the changes to take effect.
+If you used the install.sh script, you can configure your streams in /etc/opensurv. After editing the config files, you need to restart Rewind Display (`systemctl restart lightdm.service`) for the changes to take effect.
 
 If you are connected via keyboard/keypad, you can force the next screen by pressing and holding n or space (or keypad "+") for some seconds in case multiple screens were defined (this takes longer depending on the number of unconnectable streams, and they thus need to wait for timeout; keep holding until the screen changes. Note, you can change probe_timeout per camera stream if needed).
 
@@ -112,14 +121,14 @@ In case of dual monitors, then the screens on both monitors will be controlled a
 
 ## Troubleshooting
 
-- I advise you to test your URLs in mpv (command line) first. It should work before attempting to use them in OpenSurv.
+- I advise you to test your URLs in mpv (command line) first. It should work before attempting to use them in Rewind Display.
 
-- If you used the install.sh script, logs are created at /home/opensurv/logs/. You can use them for troubleshooting. Enable DEBUG logging for very detailed output of what is going on. Switch INFO to DEBUG in /etc/opensurv/logging.yml and restart opensurv.
+- If you used the install.sh script, logs are created at /home/opensurv/logs/. You can use them for troubleshooting. Enable DEBUG logging for very detailed output of what is going on. Switch INFO to DEBUG in /etc/opensurv/logging.yml and restart Rewind Display.
 
-- To enable detailed logging for a specific video stream in MPV, set `freeform_advanced_mpv_options: "--msg-level=all=warn --log-file=/dev/shm/debug_stream.log` for that stream and restart OpenSurv.  
+- To enable detailed logging for a specific video stream in MPV, set `freeform_advanced_mpv_options: "--msg-level=all=warn --log-file=/dev/shm/debug_stream.log` for that stream and restart Rewind Display.
   Alternatively, to enable debug logging for all MPV instances, edit `/home/opensurv/.config/mpv/mpv.conf` (these logs will be written to /home/opensurv/logs/main.log). 
 
-- If you are connected via keyboard/keypad, you can stop OpenSurv by pressing and holding q (or backspace or keypad "/") (this can take some seconds).
+- If you are connected via keyboard/keypad, you can stop Rewind Display by pressing and holding q (or backspace or keypad "/") (this can take some seconds).
 
 - To manage the screen without rebooting, use systemctl:
   - `sudo systemctl stop lightdm.service` to stop the screen.

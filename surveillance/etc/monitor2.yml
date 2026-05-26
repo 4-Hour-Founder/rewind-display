@@ -4,7 +4,7 @@ essentials:
   screens:
       #######################################################################################################
       # Below config is included for demo and test purposes
-      # After installation you can start opensurv and the demo should be started
+      # After installation you can start Rewind Display and the demo should be started
       # For full list of all options see comments in monitor1.yml
       #######################################################################################################
 
@@ -55,4 +55,3 @@ essentials:
           imageurl: true
           force_coordinates: [1260, 800, 1920, 1080]
       duration: 20
-

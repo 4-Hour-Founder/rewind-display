@@ -1,7 +1,7 @@
 #THIS IS A YAML FILE, INDENTATION IS IMPORTANT. ALSO DO NOT USE TABS FOR INDENTATION, BUT USE SPACES
 
 essentials:
-  #Opensurv will rotate over the following screens in the order they are configured here, if you only define one screen no rotation will happen
+  # Rewind Display will rotate over the following screens in the order they are configured here. If you only define one screen, no rotation will happen.
 
   #If you enable this option no auto rotation will happen, but you will still be able to select a screen by pressing and holding a Function Key (F1-F12) or numpad keys
   #Defaults to False
@@ -10,7 +10,7 @@ essentials:
   screens:
 #      #######################################################################################################
 #      # Below config is included for demo and test purposes
-#      # After installation you can start Opensurv and the demo should be started
+#      # After installation you can start Rewind Display and the demo should be started
 #      #######################################################################################################
 
     - streams:
@@ -100,7 +100,7 @@ essentials:
 #          enableaudio: False
 
            #Optional: timeout_waiting_for_init_stream:
-           #How long Opensurv should wait before considering the a connectable stream as lost on initialization
+           # How long Rewind Display should wait before considering a connectable stream as lost on initialization.
            #Increase this number on slow connections or slow streams, increasing this will also slow down some cycle operations
            #Increase if getting errors in the log:  _wait_for_window_to_be_initialized, window not found (7/7). Stopping attempt
            #In seconds, defaults to 7

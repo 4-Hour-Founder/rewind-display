@@ -74,10 +74,10 @@ if __name__ == '__main__':
     #Setup logger
     logger = setup_logging()
 
-    fullversion_for_installer = "1.3"
+    fullversion_for_installer = "1.3-rr.1"
 
     version = fullversion_for_installer
-    logger.info("Starting opensurv " + version)
+    logger.info("Starting Rewind Display " + version)
 
     #Read in config
     interval_check_status=cfg['advanced']['interval_check_status'] if 'interval_check_status' in cfg["advanced"] else 19 #Override of interval_check_status if set
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 #Only update the screen/check connectable cameras and repair every interval_check_status seconds
                 if loop_counter % int(interval_check_status) == 0:
                     # Only try to redraw the screen when disable_probing_for_all_streams option is false, but keep the loop
-                    logger.debug(f"MAIN {screenmanager.name}: regular start update_active_screen (every " + str(interval_check_status) + " seconds since start of opensurv)")
+                    logger.debug(f"MAIN {screenmanager.name}: regular start update_active_screen (every " + str(interval_check_status) + " seconds since start of Rewind Display)")
                     screenmanager.update_active_screen()
                     # Call the watchdogs to check and try to repair for crashed instances
                     screenmanager.run_watchdogs_active_screen()
