@@ -77,6 +77,15 @@ class IntegratedFourCameraConfigTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 validator.validate_integrated_four_camera(self.config)
 
+    def test_diagnostic_log_is_rejected_for_credential_bearing_rtsp(self) -> None:
+        stream = self.config["essentials"]["screens"][0]["streams"][0]
+        stream["freeform_advanced_mpv_options"] += (
+            " --log-file=/home/opensurv/logs/mpv-loopback-1.log"
+        )
+        with redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                validator.validate_integrated_four_camera(self.config)
+
     def test_wrong_column_count_is_rejected(self) -> None:
         self.config["essentials"]["screens"][0]["nr_of_columns"] = 2
         with redirect_stderr(io.StringIO()):

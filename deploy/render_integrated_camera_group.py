@@ -59,7 +59,10 @@ def select_direct_substream(config: dict, camera: str) -> str:
 
 
 def render_group(
-    config: dict, group_name: str, restream_cameras: set[str] | None = None
+    config: dict,
+    group_name: str,
+    restream_cameras: set[str] | None = None,
+    diagnostic_log_cameras: set[str] | None = None,
 ) -> tuple[str, list[str]]:
     groups = config.get("camera_groups") or {}
     group = groups.get(group_name)
@@ -72,11 +75,21 @@ def render_group(
     if len(set(cameras)) != 4 or not all(isinstance(name, str) for name in cameras):
         fail(f"camera group {group_name!r} contains invalid or duplicate camera names")
     restream_cameras = restream_cameras or set()
+    diagnostic_log_cameras = diagnostic_log_cameras or set()
     unknown_restreams = restream_cameras.difference(cameras)
     if unknown_restreams:
         fail(
             "restream cameras are not members of the selected group: "
             + ", ".join(sorted(unknown_restreams))
+        )
+    invalid_diagnostic_cameras = diagnostic_log_cameras.difference(
+        restream_cameras
+    )
+    if invalid_diagnostic_cameras:
+        fail(
+            "diagnostic logs are allowed only for credential-free loopback "
+            "restream cameras: "
+            + ", ".join(sorted(invalid_diagnostic_cameras))
         )
 
     lines = [
@@ -94,12 +107,17 @@ def render_group(
         "--profile=low-latency --hwdec=auto-copy --no-terminal "
         "--vo=gpu --gpu-context=x11egl"
     )
-    for camera in cameras:
+    for index, camera in enumerate(cameras, start=1):
         if camera in restream_cameras:
             source_url = "http://127.0.0.1:1984/api/stream.mp4?" + urlencode(
                 {"src": f"{camera}_sub"}
             )
             options = restream_options
+            if camera in diagnostic_log_cameras:
+                options += (
+                    " --log-file="
+                    f"/home/opensurv/logs/mpv-loopback-{index}.log"
+                )
         else:
             source_url = select_direct_substream(config, camera)
             options = direct_options
@@ -141,13 +159,25 @@ def main() -> int:
         default=[],
         help="group camera that must use the loopback go2rtc MP4 endpoint",
     )
+    parser.add_argument(
+        "--diagnostic-log-camera",
+        action="append",
+        default=[],
+        help=(
+            "credential-free loopback camera whose MPV output should be "
+            "written to a per-slot diagnostic log"
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
     config = load_config(args.config)
     rendered, cameras = render_group(
-        config, args.group, restream_cameras=set(args.restream_camera)
+        config,
+        args.group,
+        restream_cameras=set(args.restream_camera),
+        diagnostic_log_cameras=set(args.diagnostic_log_camera),
     )
     write_protected(args.output, rendered, args.force)
     print(
@@ -156,6 +186,11 @@ def main() -> int:
     )
     if args.restream_camera:
         print("Loopback restream cameras: " + ", ".join(args.restream_camera))
+    if args.diagnostic_log_camera:
+        print(
+            "MPV diagnostic logs enabled for loopback cameras: "
+            + ", ".join(args.diagnostic_log_camera)
+        )
     print(f"Output is mode 0600: {args.output}")
     return 0
 

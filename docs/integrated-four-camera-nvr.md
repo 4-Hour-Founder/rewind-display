@@ -50,6 +50,23 @@ The validator permits only `127.0.0.1:1984/api/stream.mp4` with a named
 MPV to the supported X11/EGL GPU context so automatic video-output selection
 cannot vary between the four display windows.
 
+If a loopback slot exits before creating its window, an operator may enable a
+temporary MPV diagnostic log for that camera while rendering:
+
+```sh
+curl -fsS http://127.0.0.1:5000/api/config \
+  | python3 deploy/render_integrated_camera_group.py \
+      --group display \
+      --restream-camera <camera_id> \
+      --diagnostic-log-camera <camera_id> \
+      --output /tmp/retail-rewind-display-monitor1.yml
+```
+
+Diagnostic logging is deliberately restricted to credential-free loopback
+sources and writes to `/home/opensurv/logs/mpv-loopback-<slot>.log`. Remove the
+diagnostic flag and reinstall the rendered configuration after collecting the
+error; never enable MPV file logging for direct credential-bearing RTSP URLs.
+
 Validate without printing URLs:
 
 ```sh

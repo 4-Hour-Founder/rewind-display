@@ -89,6 +89,31 @@ class IntegratedCameraGroupRendererTests(unittest.TestCase):
                     self.config, "display", restream_cameras={"unknown"}
                 )
 
+    def test_selected_loopback_camera_can_enable_safe_diagnostic_log(self) -> None:
+        rendered, _ = renderer.render_group(
+            self.config,
+            "display",
+            restream_cameras={"parking"},
+            diagnostic_log_cameras={"parking"},
+        )
+        loaded = yaml.safe_load(rendered)
+        validator.validate_integrated_four_camera(loaded)
+        options = loaded["essentials"]["screens"][0]["streams"][3][
+            "freeform_advanced_mpv_options"
+        ]
+        self.assertIn(
+            "--log-file=/home/opensurv/logs/mpv-loopback-4.log", options
+        )
+
+    def test_diagnostic_log_requires_loopback_restream(self) -> None:
+        with redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                renderer.render_group(
+                    self.config,
+                    "display",
+                    diagnostic_log_cameras={"parking"},
+                )
+
     def test_non_rtsp_source_is_rejected(self) -> None:
         self.config["go2rtc"]["streams"]["front_sub"] = [
             "ffmpeg:http://camera.invalid/sub"

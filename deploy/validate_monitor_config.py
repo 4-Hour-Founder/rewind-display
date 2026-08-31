@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shlex
 import sys
 from pathlib import Path
@@ -175,6 +176,21 @@ def validate_integrated_four_camera(config: dict) -> None:
                 f"stream {index} is missing required MPV options: "
                 + ", ".join(sorted(missing))
             )
+        log_options = [
+            token for token in option_tokens if token.startswith("--log-file=")
+        ]
+        if len(log_options) > 1:
+            fail(f"stream {index} must not configure multiple MPV log files")
+        if log_options:
+            log_path = log_options[0].split("=", 1)[1]
+            if parsed.scheme != "http" or not re.fullmatch(
+                r"/home/opensurv/logs/mpv-loopback-[1-4]\.log", log_path
+            ):
+                fail(
+                    f"stream {index} diagnostic logging is allowed only for "
+                    "credential-free loopback sources and the protected "
+                    "per-slot log path"
+                )
 
 
 def main() -> int:
