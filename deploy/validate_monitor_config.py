@@ -167,6 +167,8 @@ def validate_integrated_four_camera(config: dict) -> None:
         required = {"--profile=low-latency", "--hwdec=auto-copy", "--no-terminal"}
         if parsed.scheme == "rtsp":
             required.add("--rtsp-transport=tcp")
+        else:
+            required.update({"--vo=gpu", "--gpu-context=x11egl"})
         missing = required.difference(option_tokens)
         if missing:
             fail(

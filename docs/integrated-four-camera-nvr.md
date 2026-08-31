@@ -46,7 +46,9 @@ curl -fsS http://127.0.0.1:5000/api/config \
 
 This exception does not publish another port or add another camera connection.
 The validator permits only `127.0.0.1:1984/api/stream.mp4` with a named
-`*_sub` source; arbitrary HTTP streams remain invalid.
+`*_sub` source; arbitrary HTTP streams remain invalid. Loopback MP4 slots pin
+MPV to the supported X11/EGL GPU context so automatic video-output selection
+cannot vary between the four display windows.
 
 Validate without printing URLs:
 

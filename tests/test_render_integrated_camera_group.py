@@ -77,6 +77,10 @@ class IntegratedCameraGroupRendererTests(unittest.TestCase):
         self.assertNotIn(
             "--rtsp-transport=tcp", streams[3]["freeform_advanced_mpv_options"]
         )
+        self.assertIn("--vo=gpu", streams[3]["freeform_advanced_mpv_options"])
+        self.assertIn(
+            "--gpu-context=x11egl", streams[3]["freeform_advanced_mpv_options"]
+        )
 
     def test_restream_camera_must_belong_to_group(self) -> None:
         with redirect_stderr(io.StringIO()):

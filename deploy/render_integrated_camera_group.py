@@ -90,7 +90,10 @@ def render_group(
         "--rtsp-transport=tcp --profile=low-latency "
         "--hwdec=auto-copy --no-terminal"
     )
-    restream_options = "--profile=low-latency --hwdec=auto-copy --no-terminal"
+    restream_options = (
+        "--profile=low-latency --hwdec=auto-copy --no-terminal "
+        "--vo=gpu --gpu-context=x11egl"
+    )
     for camera in cameras:
         if camera in restream_cameras:
             source_url = "http://127.0.0.1:1984/api/stream.mp4?" + urlencode(
