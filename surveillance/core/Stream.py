@@ -64,7 +64,11 @@ class Stream:
         if self.scheme not in ["rtsp", "http", "https", "file", "rtmp"]:
             logger.error("Stream: " + self.name + " Scheme " + self.scheme + " in " + self.obfuscated_credentials_url + " is currently not supported, you can make a feature request on https://community.opensurv.net")
             sys.exit()
-        logger.debug(f'Stream: {self.name} object initialised with {stream}, {self.background_drawinstance}, {self.xdisplay_id}')
+        logger.debug(
+            f"Stream: {self.name} object initialised with source "
+            f"{self.obfuscated_credentials_url}, {self.background_drawinstance}, "
+            f"{self.xdisplay_id}"
+        )
 
     def is_imageurl(self):
         """Returns true if this stream is an imageurl"""
@@ -310,7 +314,10 @@ class Stream:
 
         # Split into list so subprocess can process all arguments
         self.command_line_shlex = shlex.split(self.command_line)
-        logger.debug(f"Stream: {self.name}: start_stream: with commandline {str(self.command_line_shlex)}")
+        logger.debug(
+            f"Stream: {self.name}: start_stream: command prepared with source "
+            f"{self.obfuscated_credentials_url}"
+        )
         self.env_with_display = os.environ.copy()
         self.env_with_display['DISPLAY'] = str(self.xdisplay_id)
         self.streamprocess = subprocess.Popen(self.command_line_shlex, preexec_fn=os.setsid, stdin=subprocess.PIPE,env=self.env_with_display)

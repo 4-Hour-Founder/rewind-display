@@ -4,15 +4,21 @@ set -Eeuo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  sudo deploy/install_display_appliance.sh --monitor-config PATH [--start]
+  sudo deploy/install_display_appliance.sh --monitor-config PATH
+    [--profile six-camera|integrated-four-camera] [--start]
 
 Installs or updates the deterministic Rewind Display runtime. The supplied
-monitor config must satisfy the six-camera profile. By default the script does
+monitor config must satisfy the selected profile. By default the script does
 not restart the visible display session; pass --start to enable and restart it.
+
+The integrated-four-camera profile is for a display running on an existing
+Intel NVR. It preserves the existing host cloudflared installation and backs
+up the existing kiosk/LightDM files before changing the selected session.
 EOF
 }
 
 monitor_config=""
+profile="six-camera"
 start_display=false
 
 while (($#)); do
@@ -20,6 +26,11 @@ while (($#)); do
     --monitor-config)
       [[ $# -ge 2 ]] || { usage >&2; exit 2; }
       monitor_config=$2
+      shift 2
+      ;;
+    --profile)
+      [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+      profile=$2
       shift 2
       ;;
     --start)
@@ -38,6 +49,15 @@ while (($#)); do
   esac
 done
 
+case "${profile}" in
+  six-camera|integrated-four-camera) ;;
+  *)
+    echo "ERROR: unsupported profile: ${profile}" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
 if [[ ${EUID} -ne 0 ]]; then
   echo "ERROR: run as root with sudo" >&2
   exit 2
@@ -51,6 +71,22 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 repo_dir=$(cd "${script_dir}/.." && pwd)
 source_dir="${repo_dir}/surveillance"
 monitor_config=$(realpath "${monitor_config}")
+
+backup_dir="/var/backups/rewind-display/install-$(date -u +%Y%m%dT%H%M%SZ)"
+install -d -m 0700 "${backup_dir}"
+if [[ -d /home/opensurv/etc ]]; then
+  cp -a /home/opensurv/etc "${backup_dir}/opensurv-etc"
+fi
+if [[ ${profile} == integrated-four-camera ]]; then
+  if [[ -d /etc/lightdm/lightdm.conf.d ]]; then
+    cp -a /etc/lightdm/lightdm.conf.d "${backup_dir}/lightdm.conf.d"
+  fi
+  if [[ -f /usr/local/bin/retailrewind-kiosk ]]; then
+    cp -a /usr/local/bin/retailrewind-kiosk \
+      "${backup_dir}/retailrewind-kiosk"
+  fi
+fi
+echo "Pre-install state backed up to ${backup_dir}"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
@@ -72,17 +108,19 @@ apt-get install -y \
   xdotool \
   xfce4
 
-install -d -m 0755 /usr/share/keyrings
-curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
-  | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
-printf '%s\n' \
-  'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' \
-  > /etc/apt/sources.list.d/cloudflared.list
-apt-get update
-apt-get install -y cloudflared
+if [[ ${profile} == six-camera ]]; then
+  install -d -m 0755 /usr/share/keyrings
+  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
+    | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+  printf '%s\n' \
+    'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' \
+    > /etc/apt/sources.list.d/cloudflared.list
+  apt-get update
+  apt-get install -y cloudflared
+fi
 
 python3 "${script_dir}/validate_monitor_config.py" \
-  --profile six-camera "${monitor_config}"
+  --profile "${profile}" "${monitor_config}"
 
 if id opensurv >/dev/null 2>&1; then
   opensurv_home=$(getent passwd opensurv | cut -d: -f6)
@@ -92,13 +130,6 @@ if id opensurv >/dev/null 2>&1; then
   fi
 else
   useradd --create-home --home-dir /home/opensurv --shell /bin/bash opensurv
-fi
-
-install -d -m 0755 /var/backups/rewind-display
-if [[ -d /home/opensurv/etc ]]; then
-  backup_dir="/var/backups/rewind-display/etc-$(date -u +%Y%m%dT%H%M%SZ)"
-  cp -a /home/opensurv/etc "${backup_dir}"
-  echo "Existing config backed up to ${backup_dir}"
 fi
 
 install -d -o opensurv -g opensurv -m 0755 \
@@ -138,10 +169,18 @@ install -m 0644 \
 
 install -d -m 0755 /etc/retailrewind
 source_commit=$(git -C "${repo_dir}" rev-parse HEAD 2>/dev/null || echo unknown)
+if [[ ${profile} == six-camera ]]; then
+  installed_profile="retail-rewind-six-camera-v1"
+  cloudflared_ownership="host-systemd"
+else
+  installed_profile="retail-rewind-integrated-four-camera-v1"
+  cloudflared_ownership="existing-nvr-host-systemd"
+fi
 printf '%s\n' \
-  'DISPLAY_PROFILE=retail-rewind-six-camera-v1' \
+  "DISPLAY_PROFILE=${installed_profile}" \
   "REWIND_DISPLAY_COMMIT=${source_commit}" \
-  'CLOUDFLARED_OWNERSHIP=host-systemd' \
+  "CLOUDFLARED_OWNERSHIP=${cloudflared_ownership}" \
+  "ROLLBACK_BACKUP=${backup_dir}" \
   > /etc/retailrewind/display-appliance.env
 chmod 0644 /etc/retailrewind/display-appliance.env
 
@@ -158,5 +197,10 @@ else
   echo "Start when ready: sudo systemctl restart lightdm"
 fi
 
-echo "Installed profile: retail-rewind-six-camera-v1"
-echo "cloudflared is installed on the host; configure Access before enabling its connector"
+echo "Installed profile: ${installed_profile}"
+if [[ ${profile} == six-camera ]]; then
+  echo "cloudflared is installed on the host; configure Access before enabling its connector"
+else
+  echo "existing NVR cloudflared configuration was preserved"
+  echo "Chromium rollback: remove /etc/lightdm/lightdm.conf.d/50-rewind-display.conf and restart LightDM"
+fi

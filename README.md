@@ -77,6 +77,9 @@ It includes the credential-free template, deterministic installer, direct
 Cloudflare management baseline, and acceptance checks used for fleet testing.
 New hardware starts with the
 [headless Raspberry Pi bootstrap](docs/headless-pi-bootstrap.md).
+For an existing Intel NVR that should replace its browser kiosk with a fixed
+four-camera view, use the
+[integrated four-camera NVR profile](docs/integrated-four-camera-nvr.md).
 
 ## URL sources
 
