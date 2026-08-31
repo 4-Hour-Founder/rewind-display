@@ -51,7 +51,8 @@ sudo deploy/install_display_appliance.sh \
 The installer installs the display runtime but does not restart LightDM unless
 `--start` is supplied. It backs up existing LightDM configuration and the
 Retail Rewind Chromium launcher beneath `/var/backups/rewind-display`, leaves
-the original kiosk files in place, and does not modify cloudflared.
+the original kiosk files in place, grants the runtime user access to the host's
+`video` and `render` devices, and does not modify cloudflared.
 
 ## Cut over
 

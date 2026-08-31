@@ -131,6 +131,14 @@ if id opensurv >/dev/null 2>&1; then
 else
   useradd --create-home --home-dir /home/opensurv --shell /bin/bash opensurv
 fi
+for runtime_group in audio video render; do
+  if getent group "${runtime_group}" >/dev/null 2>&1; then
+    usermod --append --groups "${runtime_group}" opensurv
+  fi
+done
+# Permit operators to traverse to sanitized runtime logs while monitor configs
+# and Xauthority remain protected by their individual file modes.
+chmod 0751 /home/opensurv
 
 install -d -o opensurv -g opensurv -m 0755 \
   /home/opensurv/bin \
