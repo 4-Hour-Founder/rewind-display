@@ -70,6 +70,13 @@ class IntegratedFourCameraConfigTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 validator.validate_integrated_four_camera(self.config)
 
+    def test_only_loopback_go2rtc_http_is_allowed(self) -> None:
+        stream = self.config["essentials"]["screens"][0]["streams"][0]
+        stream["url"] = "http://camera.invalid:1984/api/stream.mp4?src=camera_sub"
+        with redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                validator.validate_integrated_four_camera(self.config)
+
     def test_wrong_column_count_is_rejected(self) -> None:
         self.config["essentials"]["screens"][0]["nr_of_columns"] = 2
         with redirect_stderr(io.StringIO()):

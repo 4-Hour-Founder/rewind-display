@@ -30,7 +30,23 @@ curl -fsS http://127.0.0.1:5000/api/config \
 
 The renderer selects each camera's single direct `*_sub` RTSP source, removes
 go2rtc-only URL fragments, preserves group order, writes mode `0600`, and
-prints only camera identifiers. It refuses ambiguous or non-RTSP sources.
+prints only camera identifiers. It refuses ambiguous direct sources.
+
+If a camera demonstrably cannot serve a second direct RTSP consumer while
+Frigate/go2rtc holds its working session, route only that camera through the
+already-published loopback MP4 endpoint:
+
+```sh
+curl -fsS http://127.0.0.1:5000/api/config \
+  | python3 deploy/render_integrated_camera_group.py \
+      --group display \
+      --restream-camera <camera_id> \
+      --output /tmp/retail-rewind-display-monitor1.yml
+```
+
+This exception does not publish another port or add another camera connection.
+The validator permits only `127.0.0.1:1984/api/stream.mp4` with a named
+`*_sub` source; arbitrary HTTP streams remain invalid.
 
 Validate without printing URLs:
 

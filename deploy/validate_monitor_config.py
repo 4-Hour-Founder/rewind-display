@@ -7,7 +7,7 @@ import argparse
 import shlex
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 try:
     import yaml
@@ -116,16 +116,34 @@ def validate_integrated_four_camera(config: dict) -> None:
         if not isinstance(url, str) or not url:
             fail(f"stream {index} must have a non-empty URL")
         parsed = urlparse(url)
-        if parsed.scheme != "rtsp" or not parsed.hostname:
-            fail(f"stream {index} must use a direct RTSP URL with a hostname")
+        if parsed.scheme not in {"rtsp", "http"} or not parsed.hostname:
+            fail(
+                f"stream {index} must use direct RTSP or the loopback HTTP restream"
+            )
         try:
             parsed.port
         except ValueError:
             fail(f"stream {index} has an invalid RTSP port")
-        if not parsed.path or parsed.path == "/":
-            fail(f"stream {index} must name a camera RTSP path")
-        if parsed.fragment:
-            fail(f"stream {index} must not retain a go2rtc source fragment")
+        if parsed.scheme == "rtsp":
+            if not parsed.path or parsed.path == "/":
+                fail(f"stream {index} must name a camera RTSP path")
+            if parsed.fragment:
+                fail(f"stream {index} must not retain a go2rtc source fragment")
+        else:
+            query = parse_qs(parsed.query)
+            if (
+                parsed.hostname not in {"127.0.0.1", "localhost"}
+                or parsed.port != 1984
+                or parsed.path != "/api/stream.mp4"
+                or len(query.get("src", [])) != 1
+                or not query["src"][0].endswith("_sub")
+                or parsed.username is not None
+                or parsed.password is not None
+            ):
+                fail(
+                    f"stream {index} HTTP source must be a credential-free "
+                    "loopback go2rtc substream on port 1984"
+                )
 
         label = stream.get("name")
         if not isinstance(label, str) or not label.strip():
@@ -146,12 +164,9 @@ def validate_integrated_four_camera(config: dict) -> None:
             option_tokens = shlex.split(options)
         except ValueError:
             fail(f"stream {index} has invalid MPV option quoting")
-        required = {
-            "--rtsp-transport=tcp",
-            "--profile=low-latency",
-            "--hwdec=auto-copy",
-            "--no-terminal",
-        }
+        required = {"--profile=low-latency", "--hwdec=auto-copy", "--no-terminal"}
+        if parsed.scheme == "rtsp":
+            required.add("--rtsp-transport=tcp")
         missing = required.difference(option_tokens)
         if missing:
             fail(

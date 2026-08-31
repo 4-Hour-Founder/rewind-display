@@ -63,6 +63,28 @@ class IntegratedCameraGroupRendererTests(unittest.TestCase):
             mode = stat.S_IMODE(output.stat().st_mode)
             self.assertEqual(mode, 0o600)
 
+    def test_selected_camera_can_use_loopback_restream(self) -> None:
+        rendered, _ = renderer.render_group(
+            self.config, "display", restream_cameras={"parking"}
+        )
+        loaded = yaml.safe_load(rendered)
+        validator.validate_integrated_four_camera(loaded)
+        streams = loaded["essentials"]["screens"][0]["streams"]
+        self.assertEqual(
+            streams[3]["url"],
+            "http://127.0.0.1:1984/api/stream.mp4?src=parking_sub",
+        )
+        self.assertNotIn(
+            "--rtsp-transport=tcp", streams[3]["freeform_advanced_mpv_options"]
+        )
+
+    def test_restream_camera_must_belong_to_group(self) -> None:
+        with redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                renderer.render_group(
+                    self.config, "display", restream_cameras={"unknown"}
+                )
+
     def test_non_rtsp_source_is_rejected(self) -> None:
         self.config["go2rtc"]["streams"]["front_sub"] = [
             "ffmpeg:http://camera.invalid/sub"

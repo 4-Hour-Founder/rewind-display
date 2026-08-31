@@ -8,6 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from urllib.parse import urlencode
 from urllib.parse import urlsplit, urlunsplit
 
 
@@ -57,7 +58,9 @@ def select_direct_substream(config: dict, camera: str) -> str:
     return direct_sources[0]
 
 
-def render_group(config: dict, group_name: str) -> tuple[str, list[str]]:
+def render_group(
+    config: dict, group_name: str, restream_cameras: set[str] | None = None
+) -> tuple[str, list[str]]:
     groups = config.get("camera_groups") or {}
     group = groups.get(group_name)
     if not isinstance(group, dict):
@@ -68,6 +71,13 @@ def render_group(config: dict, group_name: str) -> tuple[str, list[str]]:
         fail(f"camera group {group_name!r} must contain exactly 4 cameras; found {count}")
     if len(set(cameras)) != 4 or not all(isinstance(name, str) for name in cameras):
         fail(f"camera group {group_name!r} contains invalid or duplicate camera names")
+    restream_cameras = restream_cameras or set()
+    unknown_restreams = restream_cameras.difference(cameras)
+    if unknown_restreams:
+        fail(
+            "restream cameras are not members of the selected group: "
+            + ", ".join(sorted(unknown_restreams))
+        )
 
     lines = [
         "essentials:",
@@ -76,16 +86,24 @@ def render_group(config: dict, group_name: str) -> tuple[str, list[str]]:
         "      nr_of_columns: 2",
         "      streams:",
     ]
-    options = (
+    direct_options = (
         "--rtsp-transport=tcp --profile=low-latency "
         "--hwdec=auto-copy --no-terminal"
     )
+    restream_options = "--profile=low-latency --hwdec=auto-copy --no-terminal"
     for camera in cameras:
-        direct_url = select_direct_substream(config, camera)
+        if camera in restream_cameras:
+            source_url = "http://127.0.0.1:1984/api/stream.mp4?" + urlencode(
+                {"src": f"{camera}_sub"}
+            )
+            options = restream_options
+        else:
+            source_url = select_direct_substream(config, camera)
+            options = direct_options
         label = camera.replace("_", " ").title()
         lines.extend(
             [
-                f"        - url: {yaml_string(direct_url)}",
+                f"        - url: {yaml_string(source_url)}",
                 f"          name: {yaml_string(label)}",
                 "          probe_timeout: 10",
                 "          timeout_waiting_for_init_stream: 12",
@@ -114,17 +132,27 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="-", help="Frigate API JSON file or -")
     parser.add_argument("--group", default="display")
+    parser.add_argument(
+        "--restream-camera",
+        action="append",
+        default=[],
+        help="group camera that must use the loopback go2rtc MP4 endpoint",
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
     config = load_config(args.config)
-    rendered, cameras = render_group(config, args.group)
+    rendered, cameras = render_group(
+        config, args.group, restream_cameras=set(args.restream_camera)
+    )
     write_protected(args.output, rendered, args.force)
     print(
         f"OK: rendered group {args.group!r} with {len(cameras)} cameras: "
         + ", ".join(cameras)
     )
+    if args.restream_camera:
+        print("Loopback restream cameras: " + ", ".join(args.restream_camera))
     print(f"Output is mode 0600: {args.output}")
     return 0
 
