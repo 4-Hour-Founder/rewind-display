@@ -18,6 +18,8 @@ jobs:
           python-version: "3.13"
       - run: python -m pip install PyYAML
       - run: bash -n deploy/install_display_appliance.sh
+      - run: bash -n deploy/preflight_display_host.sh
+      - run: deploy/preflight_display_host.sh | grep -q '^preflight_complete=yes$'
       - run: python -m unittest tests/test_validate_monitor_config.py
       - run: >-
           python deploy/validate_monitor_config.py

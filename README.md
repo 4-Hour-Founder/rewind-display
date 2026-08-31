@@ -75,6 +75,8 @@ For the repeatable Retail Rewind Raspberry Pi profile, use the
 [six-camera public-display appliance runbook](docs/six-camera-appliance.md).
 It includes the credential-free template, deterministic installer, direct
 Cloudflare management baseline, and acceptance checks used for fleet testing.
+New hardware starts with the
+[headless Raspberry Pi bootstrap](docs/headless-pi-bootstrap.md).
 
 ## URL sources
 

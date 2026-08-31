@@ -4,6 +4,11 @@ This is the repeatable Retail Rewind Raspberry Pi display profile derived from
 the Bethel Church beta display. It preserves the useful display behavior while
 removing Bethel-specific camera addresses, credentials, and labels.
 
+For a new Pi, begin with the [headless Raspberry Pi bootstrap](headless-pi-bootstrap.md).
+It establishes Raspberry Pi OS Lite and SSH before this appliance profile is
+installed. Do not install a full desktop image first; this installer supplies
+the graphical packages needed by the dedicated display runtime.
+
 ## Contract
 
 The version 1 profile is:
@@ -34,6 +39,8 @@ The agent handles discovery and site-specific judgment:
 
 The scripts handle repeatable mechanics:
 
+- `deploy/preflight_display_host.sh` inventories a prospective host without
+  changing it or stopping when expected components are missing.
 - `deploy/validate_monitor_config.py` enforces the six-camera contract without
   printing stream URLs.
 - `deploy/install_display_appliance.sh` installs packages and the branded
