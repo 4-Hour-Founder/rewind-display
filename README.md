@@ -71,6 +71,11 @@ On a monitor, you can define multiple screens which can be cycled between.
 
 For full config explanation with all possible options, consult the config files in /etc/opensurv after install.
 
+For the repeatable Retail Rewind Raspberry Pi profile, use the
+[six-camera public-display appliance runbook](docs/six-camera-appliance.md).
+It includes the credential-free template, deterministic installer, direct
+Cloudflare management baseline, and acceptance checks used for fleet testing.
+
 ## URL sources
 
 #### file://

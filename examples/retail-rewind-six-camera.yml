@@ -1,0 +1,42 @@
+# Retail Rewind six-camera public-display profile.
+#
+# Replace NVR_HOST with the site's Retail Rewind NVR address and replace each
+# STREAM_SLOT_n value with an approved go2rtc substream name. Keep credentials
+# on the NVR; this display config should not contain camera usernames or
+# passwords.
+
+essentials:
+  screens:
+    - duration: 0
+      nr_of_columns: 3
+      streams:
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_1"
+          name: "Camera Slot 1"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_2"
+          name: "Camera Slot 2"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_3"
+          name: "Camera Slot 3"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_4"
+          name: "Camera Slot 4"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_5"
+          name: "Camera Slot 5"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
+        - url: "rtsp://NVR_HOST:8554/STREAM_SLOT_6"
+          name: "Camera Slot 6"
+          probe_timeout: 10
+          timeout_waiting_for_init_stream: 12
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency"
