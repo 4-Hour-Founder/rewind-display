@@ -149,7 +149,7 @@ def validate_integrated_four_camera(config: dict) -> None:
         required = {
             "--rtsp-transport=tcp",
             "--profile=low-latency",
-            "--hwdec=auto",
+            "--hwdec=auto-copy",
             "--no-terminal",
         }
         missing = required.difference(option_tokens)

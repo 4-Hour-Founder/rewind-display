@@ -78,7 +78,7 @@ def render_group(config: dict, group_name: str) -> tuple[str, list[str]]:
     ]
     options = (
         "--rtsp-transport=tcp --profile=low-latency "
-        "--hwdec=auto --no-terminal"
+        "--hwdec=auto-copy --no-terminal"
     )
     for camera in cameras:
         direct_url = select_direct_substream(config, camera)

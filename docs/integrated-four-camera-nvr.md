@@ -73,9 +73,10 @@ curl -fsS http://127.0.0.1:5000/api/stats > /tmp/frigate-stats.json
 
 Confirm four MPV processes remain stable, all four views are visible in group
 order, Frigate cameras and recording remain healthy, and CPU temperature does
-not regress. MPV hardware decoding is enabled with `--hwdec=auto`, the mode
-recommended by MPV for initial hardware-decode use; it falls back to software
-decoding if the safe hardware path is unavailable.
+not regress. MPV hardware decoding uses `--hwdec=auto-copy`, which selects a
+safe hardware decoder while copying decoded frames back to system memory for
+reliable compatibility with the X11 multi-window layout. It falls back to
+software decoding if no safe hardware path is available.
 
 ## Chromium rollback
 

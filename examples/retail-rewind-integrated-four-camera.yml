@@ -11,19 +11,19 @@ essentials:
           name: "Camera 1"
           probe_timeout: 10
           timeout_waiting_for_init_stream: 12
-          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto --no-terminal"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto-copy --no-terminal"
         - url: "rtsp://CAMERA_USER:CAMERA_PASSWORD@CAMERA_2:554/substream"
           name: "Camera 2"
           probe_timeout: 10
           timeout_waiting_for_init_stream: 12
-          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto --no-terminal"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto-copy --no-terminal"
         - url: "rtsp://CAMERA_USER:CAMERA_PASSWORD@CAMERA_3:554/substream"
           name: "Camera 3"
           probe_timeout: 10
           timeout_waiting_for_init_stream: 12
-          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto --no-terminal"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto-copy --no-terminal"
         - url: "rtsp://CAMERA_USER:CAMERA_PASSWORD@CAMERA_4:554/substream"
           name: "Camera 4"
           probe_timeout: 10
           timeout_waiting_for_init_stream: 12
-          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto --no-terminal"
+          freeform_advanced_mpv_options: "--rtsp-transport=tcp --profile=low-latency --hwdec=auto-copy --no-terminal"

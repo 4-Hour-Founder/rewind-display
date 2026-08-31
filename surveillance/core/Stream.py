@@ -257,9 +257,13 @@ class Stream:
       """
       logger.debug(f"Stream: {self.name}: run_stream_watchdog: Starting watchdog")
       if self.stream_started:
-        if self.streamprocess.poll() != None:
+        return_code = self.streamprocess.poll()
+        if return_code != None:
           self.streamprocess.communicate(input="\n".encode())
-          logger.error(f"Stream: {self.name}: run_stream_watchdog: is not responding trying to restart")
+          logger.error(
+              f"Stream: {self.name}: run_stream_watchdog: exited with code "
+              f"{return_code}; trying to restart"
+          )
           self.restart_stream()
         else:
           logger.debug(f"Stream: {self.name}: run_stream_watchdog: OK is responding ")
