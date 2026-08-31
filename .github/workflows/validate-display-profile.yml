@@ -1,0 +1,32 @@
+name: Validate display appliance profile
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install PyYAML
+      - run: bash -n deploy/install_display_appliance.sh
+      - run: bash -n deploy/preflight_display_host.sh
+      - run: deploy/preflight_display_host.sh | grep -q '^preflight_complete=yes$'
+      - run: python -m py_compile deploy/render_integrated_camera_group.py
+      - run: python -m unittest discover -s tests -p 'test_*.py'
+      - run: >-
+          python deploy/validate_monitor_config.py
+          --profile six-camera
+          examples/retail-rewind-six-camera.yml
+      - run: >-
+          python deploy/validate_monitor_config.py
+          --profile integrated-four-camera
+          examples/retail-rewind-integrated-four-camera.yml

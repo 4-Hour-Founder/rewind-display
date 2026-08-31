@@ -71,6 +71,16 @@ On a monitor, you can define multiple screens which can be cycled between.
 
 For full config explanation with all possible options, consult the config files in /etc/opensurv after install.
 
+For the repeatable Retail Rewind Raspberry Pi profile, use the
+[six-camera public-display appliance runbook](docs/six-camera-appliance.md).
+It includes the credential-free template, deterministic installer, direct
+Cloudflare management baseline, and acceptance checks used for fleet testing.
+New hardware starts with the
+[headless Raspberry Pi bootstrap](docs/headless-pi-bootstrap.md).
+For an existing Intel NVR that should replace its browser kiosk with a fixed
+four-camera view, use the
+[integrated four-camera NVR profile](docs/integrated-four-camera-nvr.md).
+
 ## URL sources
 
 #### file://
