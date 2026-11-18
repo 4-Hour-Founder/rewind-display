@@ -7,29 +7,30 @@ import Xlib.display
 from core.util.config import cfg
 from core.util.setuplogging import setup_logging
 from core.ScreenManager import ScreenManager
+from core.MonitorSession import MonitorSession
+
+screenmanagers = []
+monitor_session = None
 
 def get_monitors():
     display = Xlib.display.Display()
-    root = display.screen().root
-
-    monitor_list = []
-    monitor_counter = 0
-    # Iterate over the monitors and create dictionaries
-    for m in root.xrandr_get_monitors().monitors:
-        connector = display.get_atom_name(m.name)
-        monitor_dict = {
-            "xdisplay_id": ":0.0",
-            "monitor_id": connector,  # or use m.name if you want the name directly
-            "monitor_number": monitor_counter,
-            "resolution": {
-                "width": str(m.width_in_pixels),  # Convert to string as per your structure
-                "height": str(m.height_in_pixels)  # Convert to string as per your structure
-            },
-            "x_offset": str(m.x),  # Convert to string
-            "y_offset": str(m.y)  # Convert to string
-        }
-        monitor_list.append(monitor_dict)
-        monitor_counter += 1
+    try:
+        root = display.screen().root
+        monitor_list = []
+        for monitor_counter, m in enumerate(root.xrandr_get_monitors().monitors):
+            monitor_list.append({
+                "xdisplay_id": ":0.0",
+                "monitor_id": display.get_atom_name(m.name),
+                "monitor_number": monitor_counter,
+                "resolution": {
+                    "width": str(m.width_in_pixels),
+                    "height": str(m.height_in_pixels),
+                },
+                "x_offset": str(m.x),
+                "y_offset": str(m.y),
+            })
+    finally:
+        display.close()
     logger.debug(f"MAIN: get_monitors: detected {monitor_list}")
     return monitor_list
 
@@ -60,9 +61,8 @@ def handle_input(background_drawinstance):
 
 
 def sigterm_handler(_signo, _stack_frame):
-    for screenmanager in screenmanagers:
-        logger.debug(f"MAIN: instruct {screenmanager.name} to be destroyed")
-        screenmanager.destroy()
+    if monitor_session is not None:
+        monitor_session.stop()
     sys.exit(0)
 
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     #Setup logger
     logger = setup_logging()
 
-    fullversion_for_installer = "1.3-rr.1"
+    fullversion_for_installer = "1.3-rr.3"
 
     version = fullversion_for_installer
     logger.info("Starting Rewind Display " + version)
@@ -83,30 +83,20 @@ if __name__ == '__main__':
     interval_check_status=cfg['advanced']['interval_check_status'] if 'interval_check_status' in cfg["advanced"] else 19 #Override of interval_check_status if set
     enable_caching_next_screen=cfg['advanced']['enable_caching_next_screen'] if 'enable_caching_next_screen' in cfg["advanced"] else True #Override of enable_caching_next_screen if set
 
-    #Detect displays attached and their config
-    monitors=get_monitors()
-
-    screenmanagers=[]
-    count=0
-    for monitor in monitors:
-        disable_pygame = True
-        # Only one screenmanager may be the master of the pygame in the case we have multiple instances. choose the first screen detected
-        if count == 0:
-            disable_pygame = False
-        screen_manager=ScreenManager(f'screen_manager_{count}', monitor, enable_caching_next_screen, disable_pygame)
-        screenmanagers.append(screen_manager)
-        count= count + 1
-
-
-    #Bootstrap all screenmanagers
-    for screenmanager in screenmanagers:
-        logger.debug(f"MAIN {screenmanager.name}: START bootstrap")
-        screenmanager.bootstrap()
-        logger.debug(f"MAIN {screenmanager.name}: END bootstrap")
+    monitor_session = MonitorSession(ScreenManager, enable_caching_next_screen)
+    screenmanagers = monitor_session.managers
     loop_counter=0
     while True:
         try:
             loop_counter += 1
+
+            # A TV can be off at startup or disconnected later. Keep the
+            # controller running and initialize playback when it returns.
+            if monitor_session.monitors is None or loop_counter % 2 == 0:
+                monitor_session.update(get_monitors())
+            if not screenmanagers:
+                time.sleep(1)
+                continue
 
             #Handle keypresses
             #Only the first screenmanager is the controller of pygame

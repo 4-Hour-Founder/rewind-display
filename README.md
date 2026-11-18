@@ -15,6 +15,15 @@ For compatibility with upstream install scripts and configs, the Linux runtime u
 - `/home/opensurv`
 - `/etc/opensurv`
 
+## TV power and HDMI connections
+
+Rewind Display 1.3-rr.3 keeps its controller running when no monitor is detected,
+including startup with the TV switched off. Video players stay stopped while
+there is no active screen. The controller checks for monitor changes every two
+seconds, starts the configured camera wall when a monitor appears, and rebuilds
+the layout after a disconnect, reconnect, or resolution change. Turning the TV
+on therefore does not require restarting LightDM or rebooting the Pi.
+
 ## Hardware list
 Explore the [hardware section of the discussion board](https://github.com/OpenSurv/OpenSurv/discussions/categories/hardware-operating-system) to discover how OpenSurv works on various hardware.
 
